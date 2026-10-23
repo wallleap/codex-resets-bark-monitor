@@ -1,0 +1,76 @@
+name: Codex Resets -> Bark
+
+on:
+  schedule:
+    # UTC 11 and 41 minutes of each hour: a 30-minute interval away from the hour boundary.
+    - cron: '11,41 * * * *'
+  workflow_dispatch:
+    inputs:
+      test_push:
+        description: '仅测试 Bark 推送，不变更状态'
+        type: boolean
+        default: false
+        required: false
+
+permissions:
+  contents: write
+
+concurrency:
+  group: codex-resets-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    if: ${{ github.ref_name == github.event.repository.default_branch }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    env:
+      SERVER_URL: ${{ vars.BARK_SERVER_URL }}
+      DEVICE_KEY: ${{ secrets.BARK_DEVICE_KEY }}
+      TIME_ZONE: Asia/Shanghai
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check data and send Bark
+        id: check
+        # allow state checkpoint commit even when a later push fails
+        continue-on-error: true
+        run: |
+          if [ "${{ inputs.test_push }}" = "true" ]; then
+            node src/monitor.mjs --test-push
+          else
+            node src/monitor.mjs
+          fi
+
+      - name: Persist state only when changed
+        if: ${{ always() && steps.check.outcome != 'skipped' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f .data/state.json ]; then
+            echo '没有状态文件需要提交'
+            exit 0
+          fi
+          git add .data/state.json
+          if git diff --cached --quiet; then
+            echo '状态无变化，不需要 Git 提交'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git commit -m 'chore: update Codex reset monitor state [skip ci]'
+          git push origin "HEAD:${{ github.event.repository.default_branch }}"
+
+      - name: Fail workflow when monitor failed
+        if: ${{ always() && steps.check.outcome == 'failure' }}
+        run: |
+          echo '::error::监控或 Bark 推送失败。已尽可能持久化之前成功的通知记录；请查阅日志。'
+          exit 1

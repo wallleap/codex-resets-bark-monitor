@@ -1,0 +1,12 @@
+{
+  "name": "codex-resets-bark-monitor",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "check": "node src/monitor.mjs",
+    "test": "node --test",
+    "test:push": "node src/monitor.mjs --test-push"
+  }
+}
