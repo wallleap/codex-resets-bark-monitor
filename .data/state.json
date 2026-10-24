@@ -65,18 +65,8 @@
     "1995988609896513743",
     "1992370994028388670",
     "1986166501435711936",
-    "1968163721034994139"
+    "1968163721034994139",
+    "observed-2113492502355562875"
   ],
-  "plan": {
-    "id": "2113492502355562875",
-    "time": "2026-10-23T17:00:00.000Z",
-    "day": "",
-    "whenText": "",
-    "text": "Landing tomorrow before 10am PST together with a small ship.",
-    "announcedAt": "2026-10-23T04:47:34.000Z",
-    "type": "regular",
-    "status": "scheduled",
-    "url": "https://x.com/thsottiaux/status/2113492502355562875",
-    "signature": "{\"id\":\"2113492502355562875\",\"time\":\"2026-10-23T17:00:00.000Z\",\"day\":\"\",\"whenText\":\"\",\"text\":\"Landing tomorrow before 10am PST together with a small ship.\",\"announcedAt\":\"2026-10-23T04:47:34.000Z\",\"type\":\"regular\",\"status\":\"scheduled\",\"url\":\"https://x.com/thsottiaux/status/2113492502355562875\"}"
-  }
+  "plan": null
 }
